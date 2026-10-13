@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>静读 - 给重度阅读者的 RSS 工具</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:'Georgia','Songti SC','SimSun',serif; background:#faf9f6; color:#1c1b18; }
+  .wrap { max-width:960px; margin:0 auto; padding:0 24px; }
+  nav { display:flex; justify-content:space-between; align-items:center; padding:20px 0; border-bottom:1px solid #e5e2da; }
+  nav .logo { font-weight:700; font-size:17px; letter-spacing:.02em; }
+  nav .links { display:flex; gap:28px; font-family:'Segoe UI',sans-serif; font-size:14px; color:#5c574d; }
+  .hero { display:grid; grid-template-columns:1.4fr 1fr; gap:48px; align-items:end; padding:72px 0 56px; }
+  h1 { font-size:40px; line-height:1.25; font-weight:700; letter-spacing:-.01em; }
+  h1 em { font-style:normal; border-bottom:3px solid #c2410c; }
+  .hero-side p { font-family:'Segoe UI',sans-serif; font-size:15px; line-height:1.8; color:#5c574d; padding-bottom:16px; border-bottom:1px solid #e5e2da; margin-bottom:16px; }
+  .hero-side a { font-family:'Segoe UI',sans-serif; font-size:14px; font-weight:600; color:#c2410c; text-decoration:none; }
+  .feat { display:grid; grid-template-columns:1.6fr 1fr 1fr; gap:2px; background:#e5e2da; border:1px solid #e5e2da; margin-bottom:72px; }
+  .feat section { background:#fff; padding:28px 24px; }
+  .feat section:first-child { grid-row:span 2; padding:36px 32px; }
+  .feat h3 { font-size:16px; margin:14px 0 8px; }
+  .feat p { font-family:'Segoe UI',sans-serif; font-size:13px; line-height:1.7; color:#5c574d; }
+  .feat .k { font-family:'Segoe UI',sans-serif; font-size:12px; font-weight:600; letter-spacing:.08em; color:#c2410c; }
+  .quote { border-left:3px solid #c2410c; padding:4px 0 4px 20px; margin-bottom:72px; max-width:640px; }
+  .quote p { font-size:19px; line-height:1.7; }
+  .quote cite { display:block; font-family:'Segoe UI',sans-serif; font-size:13px; font-style:normal; color:#8a8478; margin-top:10px; }
+  footer { border-top:1px solid #e5e2da; padding:28px 0 48px; font-family:'Segoe UI',sans-serif; font-size:13px; color:#8a8478; display:flex; justify-content:space-between; }
+  svg { display:inline-block; vertical-align:-3px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <nav>
+    <div class="logo">静读</div>
+    <div class="links"><span>功能</span><span>定价</span><span>日志</span></div>
+  </nav>
+  <section class="hero">
+    <h1>把你订阅的 300 个源，<br>读成 <em>20 分钟</em>能读完的一份早报。</h1>
+    <div class="hero-side">
+      <p>静读不猜你喜欢什么。它只做一件事：把你在意的源按重要性排好、去重、压缩到一屏。RSS 老用户都懂——我们要的是掌控，不是推送。</p>
+      <a href="#">免费版可订阅 100 个源 →</a>
+    </div>
+  </section>
+  <section class="feat">
+    <section>
+      <span class="k">核心</span>
+      <h3>早报模式</h3>
+      <p>每天 7:00 生成一份按你定义的优先级排序的阅读清单：同一事件的多个来源自动合并成一条，标注最早报道的源。读完划掉，没有无限信息流。清单支持导出为 Markdown，放进你自己的笔记工具。</p>
+    </section>
+    <section>
+      <span class="k">去重</span>
+      <h3>同源合并</h3>
+      <p>转载、洗稿、通稿识别为同一事件，只留原始出处。</p>
+    </section>
+    <section>
+      <span class="k">隐私</span>
+      <h3>无追踪</h3>
+      <p>不埋点、不做用户画像，数据导出随时可带走。</p>
+    </section>
+    <section>
+      <span class="k">离线</span>
+      <h3>本地缓存</h3>
+      <p>全文存本地，地铁里照常读，不吃流量。</p>
+    </section>
+    <section>
+      <span class="k">快</span>
+      <h3>秒开</h3>
+      <p>纯静态渲染，冷启动 0.4 秒，老笔记本不风扇狂转。</p>
+    </section>
+  </section>
+  <section class="quote">
+    <p>"我退订了所有 newsletter，只留静读。它不会想办法让我多待一分钟，这本身就是最大的功能。"</p>
+    <cite>— 某订阅了 8 年 RSS 的用户</cite>
+  </section>
+  <footer>
+    <span>静读 · 独立开发，不追热点</span>
+    <span>hello@jingdu.example</span>
+  </footer>
+</div>
+</body>
+</html>
