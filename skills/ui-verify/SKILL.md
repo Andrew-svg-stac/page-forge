@@ -1,102 +1,105 @@
 ---
 name: ui-verify
 description: >
-  当用户要求"验证 UI"、"验收页面"、"看看效果"、"浏览器里跑一下"、
-  "检查前端改动效果"、"截图看看页面"时触发。
-  本 Skill 是 UI 验收的流程总入口（起服务 → 视觉段看图 → 交互段走流程 →
-  交付结果清单），强制每次 UI 活真正打开页面"看"，
-  禁止只靠代码推断或数字验证收工。
-  工具示例用 agent-browser CLI，可替换为你环境里的任何浏览器自动化工具
-  （Playwright / Puppeteer MCP 等），流程本身工具无关。
+  Invoke when the user asks to "verify the UI", "accept a page", "see how it
+  looks", "run it in the browser", "check this frontend change", or
+  "screenshot the page". This skill is the single entry point for UI
+  acceptance (start server → visual check via screenshots → walk interaction
+  flows → deliver a results checklist). Every UI task must actually open the
+  page and "look" — finishing based on code inference or numeric checks alone
+  is forbidden. Tool examples use the agent-browser CLI, but any browser
+  automation tool (Playwright / Puppeteer MCP, etc.) can be substituted; the
+  workflow itself is tool-agnostic.
+  Chinese triggers: 验证UI / 验收页面 / 看看效果 / 浏览器里跑一下 / 截图看看页面.
 ---
 
-# UI 验收流程（ui-verify）
+# UI acceptance workflow (ui-verify)
 
-## 为什么存在
+## Why this exists
 
-纯代码推断和数字验证（getComputedStyle、scrollWidth==offsetWidth）抓不到真实视觉 bug——flex 压缩导致的文字竖排换行、颜色层级观感错误，只有打开页面看才知道。**本 Skill 是硬流程：UI 活必须走完五步才交付。**
+Pure code inference and numeric checks (getComputedStyle, scrollWidth==offsetWidth) can't catch real visual bugs — text wrapping vertically because of flex compression, or a color hierarchy that reads wrong. You only find them by opening the page and looking. **This skill is a hard process: a UI task must complete all five steps before delivery.**
 
-## 触发条件
+## Trigger conditions
 
-- "验证一下 xxx 在浏览器里的效果" / "看看页面效果" / "验收 UI"
-- "检查下这个前端改动对不对" / "截图看看"
-- 任何涉及"确认页面实际表现"的请求
+- "Verify xxx in the browser" / "see how the page looks" / "accept the UI"
+- "Check whether this frontend change is right" / "take a screenshot"
+- Any request involving "confirm the page's actual behavior"
 
-## 工作流程（五步，不可跳步）
+## Workflow (five steps, no skipping)
 
-### 第 0 步：选型
+### Step 0: pick the approach
 
-| 条件 | 用什么 |
+| Condition | Use |
 |---|---|
-| 本地 localhost 页面（95% 场景） | 浏览器自动化工具（示例：agent-browser） |
-| 需要登录态的线上系统 | 连接带调试端口的真实浏览器（如 Playwright + `--remote-debugging-port`） |
-| 多账号/多环境并行 | 隔离 session / 独立 profile |
+| Local localhost page (95% of cases) | A browser automation tool (example: agent-browser) |
+| Online system needing login state | Connect to a real browser with a debugging port (e.g. Playwright + `--remote-debugging-port`) |
+| Multi-account / multi-environment parallel | Isolated sessions / separate profiles |
 
-**纪律：同一时间只保活一个自动化浏览器实例**，收工/切任务即关闭——自动化浏览器是内存大户，多开会把宿主机拖进交换分区。
+**Discipline: at most one live automated browser instance at a time.** Close it when done or when switching tasks — automated browsers are memory heavy; several at once will push the host machine into swapping.
 
-### 第 1 步：起服务并确认通
+### Step 1: start the server and confirm it responds
 
-- 后台启动 dev server（长跑进程建议脱离当前 shell 会话启动，避免会话退出连带杀掉服务）
-- `curl -s -o /dev/null -w "%{http_code}" http://localhost:<端口>` 返回 2xx/3xx 才继续，避免白等
+- Start the dev server in the background (for long-running processes, detach from the current shell session so it doesn't die with the session)
+- `curl -s -o /dev/null -w "%{http_code}" http://localhost:<port>` must return 2xx/3xx before continuing — don't wait on a dead server
 
-### 第 2 步：视觉段——看效果对不对（核心）
+### Step 2: visual check — does it look right (core)
 
-1. 打开 `http://localhost:<端口>`
-2. 全页截图落盘（agent-browser：`agent-browser screenshot --full <路径>`，flag 在路径前）
-3. **看图**：把截图交给多模态模型或自己肉眼逐项核对。分析 prompt 要具体："详细描述布局结构、颜色、组件、交互元素"，或逐项问"X 是横排还是竖排 / 有没有溢出"
-4. 重点看：布局错乱、文字溢出/竖排换行、颜色层级、间距、移动端断点
+1. Open `http://localhost:<port>`
+2. Save a full-page screenshot (agent-browser: `agent-browser screenshot --full <path>`, flag BEFORE the path)
+3. **Look at the image**: hand it to a multimodal model or eyeball it item by item. The analysis prompt must be specific: "describe the layout structure, colors, components, and interactive elements in detail", or ask point questions like "is X horizontal or vertical / does anything overflow"
+4. Focus on: broken layouts, text overflow / vertical wrapping, color hierarchy, spacing, mobile breakpoints
 
-### 第 3 步：交互段——看功能通不通
+### Step 3: interaction check — does it work
 
 ```bash
-agent-browser snapshot -i              # 拿元素引用（只列可交互元素）
-agent-browser fill @e3 "测试内容"       # 或语义定位
+agent-browser snapshot -i              # get element refs (interactive elements only)
+agent-browser fill @e3 "test content"  # or locate semantically
 agent-browser click @e5
-agent-browser wait --text "成功标志"    # 关键：等结果出现，不等会误判
-agent-browser errors                   # 页面 JS 报错
-agent-browser console                  # console 消息
+agent-browser wait --text "success marker"  # key: wait for the result, or you'll misjudge
+agent-browser errors                   # page JS errors
+agent-browser console                  # console messages
 ```
 
-走核心流程（如登录→操作→提交）；页面一变（导航/热更新）元素引用即过期，重新 snapshot。
+Walk the core flow (e.g. login → act → submit). After any page change (navigation / hot reload) element refs expire — re-snapshot.
 
-### 第 4 步：交付结果
+### Step 4: deliver results
 
-给用户两样，不让回翻：
+Give the user two things so they don't have to scroll back:
 
-- 截图路径（用户可自行打开核对）
-- 通过/失败点清单
+- Screenshot path (they can open and check themselves)
+- A pass/fail checklist
 
-发现问题先报告再修，不擅自改。
+Report problems before fixing; don't change things unilaterally.
 
-### 第 4.5 步：轻量影响面兜底
+### Step 4.5: lightweight blast-radius check
 
-1. `git status` / `git diff --name-only` 看这次实际碰了哪些文件（含后端——后端改了前端遭殃的回归，只看页面发现不了）
-2. 对碰到的共享物（共享组件/工具函数/API）grep 谁还在用 → 列出受影响的兄弟页面
-3. 挑 top 1-2 个受影响页面走快速冒烟（打开 → 核心交互点一下 → 看 errors），不用全五步
-4. 结果写进交付清单：`影响面：本次改 A，连带检查 B（通过）/ C（未检查，理由）`
-5. 发现影响面比预期大（要动共享物/多页面遭殃）→ 停下建议升级处理，不带病收工
+1. `git status` / `git diff --name-only` to see which files were actually touched (backend included — a backend change breaking the frontend won't show up by looking at pages alone)
+2. For shared artifacts (shared components / utility functions / APIs), grep who else uses them → list affected sibling pages
+3. Pick the top 1-2 affected pages for a quick smoke test (open → click through the core interaction → check errors); no need for all five steps
+4. Add to the delivery checklist: `Blast radius: this change touched A; also checked B (pass) / C (not checked, reason)`
+5. If the blast radius turns out bigger than expected (touching shared artifacts / multiple pages affected) → stop and escalate instead of shipping in a broken state
 
-## 输出格式示例
+## Example output format
 
 ```
-## UI 验收结果：<页面/功能名>
+## UI acceptance: <page/feature name>
 
-✅ 通过项
-- 布局：整体结构与设计一致，无错位
-- 交互：登录→提交流程走通，无 JS 报错
+✅ Pass
+- Layout: overall structure matches the design, nothing misaligned
+- Interaction: login → submit flow works, no JS errors
 
-❌ 失败项
-- 文字溢出：按钮"确定提交"在 375px 宽度下被截断
+❌ Fail
+- Text overflow: the "Submit" button is truncated at 375px width
 
-截图：<路径>/verify-20260101.png
+Screenshot: <path>/verify-20260101.png
 ```
 
-## 坑清单（实战踩过，别再踩）
+## Pitfall list (hit in practice — don't repeat)
 
-- 全页截图 flag 放路径**前**，放路径后会被当成保存文件名
-- 导航/热更新后元素引用过期 → 重新 snapshot 再操作
-- fixed 定位元素 offsetParent===null，别用它判断可见性
-- 长耗时（>15s）单条 eval 会拖死调试通道 → 拆短命令
-- 改完代码立刻测可能被热更新干扰（模块级状态被重置）→ 结果诡异先 `location.reload()` 重测再下结论
-- 浏览器命令挂死 → 先查会话/进程残留再重试，别傻重试同一命令
-- 命令语法拿不准 → 查工具自带文档，不靠记忆写命令
+- Full-page screenshot flag goes BEFORE the path; after the path it's treated as the filename
+- Element refs expire after navigation / hot reload → re-snapshot before acting
+- Fixed-position elements have offsetParent===null; don't use that to judge visibility
+- A single eval over ~15s drags the debug channel to a halt → split into short commands
+- Testing right after editing can be confused by hot reload (module state reset) → if results look weird, `location.reload()` and retest before concluding
+- Browser commands hanging → check for session/process leftovers before retrying; don't blindly retry the same command
+- Unsure about command syntax → check the tool's own docs; don't write commands from memory

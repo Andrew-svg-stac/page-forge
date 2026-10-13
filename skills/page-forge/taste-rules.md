@@ -1,58 +1,58 @@
-# taste-rules — 反 AI 味风格规则（page-forge 内置附录）
+# taste-rules — anti-slop style rules (built into page-forge)
 
-> 本文件是浓缩重写版，方法论来源与致意见主仓 README 的 Credits 节。
-> 三部分：风格拨盘（P1 用）→ 硬规则（P2 用）→ 动效原则与交付检查单（P3/P4 用）。
+> This is a condensed rewrite. For methodology sources and credits see the Credits section of the repo README.
+> Three parts: taste dials (P1) → hard rules (P2) → motion principles & delivery checklist (P3/P4).
 
-## 一、三个风格拨盘（P1 定调用）
+## 1. The three taste dials (set in P1)
 
-先读需求定三个拨盘，后续所有布局/动效/密度决策都由它们驱动：
+Read the requirements and set three dials first; every later layout / motion / density decision is driven by them:
 
-| 拨盘 | 1 分 | 10 分 | 基准 |
+| Dial | 1 | 10 | Baseline |
 |---|---|---|---|
-| 布局变化度 DESIGN_VARIANCE | 完全对称 | 艺术性错落 | 8 |
-| 动效强度 MOTION_INTENSITY | 静态 | 电影感/物理动效 | 6 |
-| 视觉密度 VISUAL_DENSITY | 画廊级留白 | 驾驶舱密排 | 4 |
+| Layout variance DESIGN_VARIANCE | fully symmetric | artful asymmetry | 8 |
+| Motion intensity MOTION_INTENSITY | static | cinematic / physical | 6 |
+| Visual density VISUAL_DENSITY | gallery whitespace | cockpit density | 4 |
 
-按需求信号调（用户明说优先于推断）：
+Adjust by requirement signal (explicit user words beat inference):
 
-| 信号 | 变化度 | 动效 | 密度 |
+| Signal | Variance | Motion | Density |
 |---|---|---|---|
-| 极简 / 冷静 / 编辑器风 | 5-6 | 3-4 | 2-3 |
-| 高级消费品牌 / 类 Apple | 7-8 | 5-7 | 3-4 |
-| 玩趣 / Dribbble / 代理商风 | 9-10 | 8-10 | 3-4 |
-| 落地页 / 作品集（默认） | 7-9 | 6-8 | 3-5 |
-| 信任优先 / 政务 / 无障碍关键 | 3-4 | 2-3 | 4-5 |
-| 重做-保留基调 | 沿用现状 | +1 | 沿用现状 |
-| 重做-推翻重来 | +2 | +2 | 沿用现状 |
+| Minimal / calm / editorial | 5-6 | 3-4 | 2-3 |
+| Premium consumer brand / Apple-like | 7-8 | 5-7 | 3-4 |
+| Playful / Dribbble / agency | 9-10 | 8-10 | 3-4 |
+| Landing page / portfolio (default) | 7-9 | 6-8 | 3-5 |
+| Trust-first / government / accessibility-critical | 3-4 | 2-3 | 4-5 |
+| Redo — keep the tone | keep current | +1 | keep current |
+| Redo — start fresh | +2 | +2 | keep current |
 
-## 二、反 AI 味硬规则（P2 逐条对，违反任一=返工）
+## 2. Anti-slop hard rules (check one by one in P2; any violation = rework)
 
-1. **品牌色只出现在该出现的地方**——按钮/选中态/链接/关键进度。内容区大面积铺品牌色=违规。黑白灰打底 + 一个强调色。
-2. **禁内容区渐变**、禁玻璃拟态、禁发光边框（渐变描边卡片必改白卡+语义色侧条）。品牌渐变只许留在 logo 等既有品牌资产。
-3. **禁等宽同构卡片阵**——三张/四张一模一样的卡片排排坐是 AI 生成页的标志性指纹。必须有主次（主卡放大、合并、或改列表）。
-4. **禁 emoji 当图标**，统一线性图标库（lucide 风格），currentColor 随文字色。
-5. **排版三件套查一遍**：字号档位 ≤5 档且正文 ≥14px（辅助 ≥12px）；字重用 400/600/700 三档拉层级，不许只靠「变小+变灰」；行高正文 1.5-1.7。
-6. **色彩校准**：中性色阶走蓝灰调而非纯灰；饱和度克制（主色 60%+ 场景用其 8-10% 透明度底）；语义色只留成功绿/警告琥珀/危险红，其余归灰阶；标签一律浅底深字。
-7. **真实感文案**：禁 Lorem、禁占位空话（"赋能·引领·打造"句式）、禁营销式副标题（"自动X·自动Y·自动Z"三连）。写具体、有数字、有人味的内容。
-8. **间距走尺度系统**（4/8 基数），组件内聚间距小、组件间隔间距大，靠间距分组而不是靠边框分组。
-9. **材质感**：阴影分两层（近距小阴影定层次 + 远距大阴影定浮起）；边框 1px 走浅灰；圆角档位 ≤3 档并全站一致。
-10. **内容密度**：首屏一个视觉焦点，别什么都塞 hero；空状态要设计（灰图标+一句话），不留裸占位符。
+1. **Brand color only where it belongs** — buttons / selected states / links / key progress. Large brand-color areas in content regions = violation. Black/white/gray base + one accent.
+2. **No gradients in content areas**, no glassmorphism, no glowing borders (gradient-strokeed cards become white cards + semantic-color side bars). Brand gradients stay only on existing brand assets like the logo.
+3. **No equal-width identical card grids** — three or four identical cards in a row is the signature fingerprint of AI-generated pages. There must be hierarchy (one card enlarged, merged, or turned into a list).
+4. **No emoji as icons** — use a consistent line icon set (lucide-style), currentColor following the text color.
+5. **Check the typography trio**: ≤5 font-size steps with body ≥14px (auxiliary ≥12px); hierarchy via 400/600/700 weights, never just "smaller + grayer"; body line-height 1.5-1.7.
+6. **Calibrate color**: neutral scale leans blue-gray, not pure gray; restrained saturation (use 8-10% alpha of the primary for 60%+ surfaces); semantic colors limited to success green / warning amber / danger red, everything else in grays; labels always light background + dark text.
+7. **Copy that feels real**: no Lorem, no filler phrases ("empower · lead · enable"), no marketing triplets ("auto-X · auto-Y · auto-Z"). Write something specific, with numbers, with a human voice.
+8. **Spacing on a scale system** (4/8 base), tight spacing inside components, generous between them — group by spacing, not by borders.
+9. **Material feel**: shadows in two layers (near small shadow for hierarchy + far large shadow for elevation); 1px borders in light gray; ≤3 border-radius steps, consistent site-wide.
+10. **Content density**: one visual focal point above the fold; don't stuff everything into the hero. Design empty states (gray icon + one sentence); no bare placeholders.
 
-## 三、动效原则（P3）
+## 3. Motion principles (P3)
 
-- 时长：UI 反馈 <150ms，进出场 <300ms，绝不超 500ms
-- 缓动：进入用 ease-out，退出可 ease-in；弹跳感靠 cubic-bezier 不是靠时长
-- 只动 transform 和 opacity（合成层属性），不动 top/left/width/height
-- 按钮 `:active { transform: scale(0.97) }` 提供按压手感
-- 每处动效要能说出目的（引导视线/确认操作/表达空间关系），说不出就删
-- `@media (prefers-reduced-motion: reduce)` 下全部动效降为瞬间切换
+- Duration: UI feedback <150ms, enter/exit <300ms, never over 500ms
+- Easing: ease-out for entrances, ease-in acceptable for exits; bounce comes from cubic-bezier, not from longer durations
+- Animate only transform and opacity (compositor-friendly), never top/left/width/height
+- Buttons get `:active { transform: scale(0.97) }` for tactile feedback
+- Every motion effect must state its purpose (guide the eye / confirm an action / express spatial relation); if you can't, delete it
+- Under `@media (prefers-reduced-motion: reduce)`, all motion degrades to instant state changes
 
-## 四、交付前检查单（P4 兜底，MUST 项）
+## 4. Pre-delivery checklist (P4 safety net, MUST items)
 
-- [ ] 键盘可达：Tab 顺序合理，所有交互元素 focus 可见（focus-visible 样式）
-- [ ] 触控目标 ≥24×24px（推荐 44）
-- [ ] 表单：label 关联、错误态明确、autocomplete 正确
-- [ ] 暗色模式不破版（若有）：对比度达标，图片不刺眼
-- [ ] 移动端 375px 宽不溢出、不横向滚动
-- [ ] 图片有 alt，语义化标签（nav/main/button 不是 div 山）
-- [ ] 构建零报错，console 无红色错误
+- [ ] Keyboard reachable: sensible Tab order, visible focus on all interactive elements (focus-visible styles)
+- [ ] Touch targets ≥24×24px (44 recommended)
+- [ ] Forms: labels associated, clear error states, correct autocomplete
+- [ ] Dark mode doesn't break (if present): contrast passes, images not glaring
+- [ ] No overflow or horizontal scroll at 375px mobile width
+- [ ] Images have alt, semantic tags (nav/main/button, not a mountain of divs)
+- [ ] Build has zero errors, console has no red errors
