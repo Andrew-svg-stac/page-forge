@@ -51,8 +51,9 @@ Goal: lock down "what kind of page" before touching code.
 Run only if the brief includes motion requirements or the user asked for a "lively feel"; skip for purely static admin pages.
 
 1. If GSAP-related skills are available (e.g. gsap-core / gsap-scrolltrigger), use them for hero motion and scroll triggers; **otherwise degrade gracefully** — CSS transitions/animations + Intersection Observer achieve equivalent effects. Never block on a missing dependency
-2. Micro-interactions follow the motion principles in `taste-rules.md`: UI motion <300ms, ease-out entrances, button `:active scale(0.97)`, animate only transform/opacity, respect `prefers-reduced-motion`
-3. Less is more: every motion effect must justify its purpose; delete the ones that can't
+2. Pick from the four presets in `motion-presets.md` (this dir): hero entrance / scroll narrative / micro-interactions / count-up stats — each with a copy-paste skeleton, tuning table, and pitfalls. Motion budget per page: **one signature pattern + micro-interactions**; never stack all presets
+3. Micro-interactions follow the motion principles in `taste-rules.md`: UI motion <300ms, ease-out entrances, button `:active scale(0.97)`, animate only transform/opacity, respect `prefers-reduced-motion`
+4. Less is more: every motion effect must justify its purpose; delete the ones that can't
 
 ## P4 Delivery (ui-verify + taste checklist)
 
