@@ -59,9 +59,10 @@ Run only if the brief includes motion requirements or the user asked for a "live
 
 1. `ui-verify` starts a server and screenshots for acceptance: full page + key interaction states, at both desktop and mobile widths
 2. Self-check screenshots against the anti-slop list (the P1 key points + the checklist appendix in `taste-rules.md`); on failure, go back to P2, fix, re-screenshot
-3. Run the interface safety checklist from `taste-rules.md` (keyboard reachable, touch targets ≥24px, visible focus, form conventions, dark mode)
-4. **User Gate B**: hand the screenshots (and before/after comparisons for redo tasks) to the user for visual sign-off. Delivered only when they pass
-5. After passing, mark state.md as delivered and shut down the browser/server processes used for acceptance
+3. **Quality score loop (optional enhancement, default on for new builds and redesigns)**: per `quality-loop.md` (this dir) — screenshot → score ten dimensions → fix the three weakest (concrete value changes) → re-shoot, max 3 rounds, bar = average ≥8 with no dimension under 7; skip for purely functional admin pages. Correctness problems still route through `ui-verify`; this loop only iterates on polish
+4. Run the interface safety checklist from `taste-rules.md` (keyboard reachable, touch targets ≥24px, visible focus, form conventions, dark mode)
+5. **User Gate B**: hand the screenshots (and before/after comparisons for redo tasks) to the user for visual sign-off. Delivered only when they pass
+6. After passing, mark state.md as delivered and shut down the browser/server processes used for acceptance
 
 ## Checkpoint resume
 
