@@ -1,84 +1,121 @@
 ---
 name: page-forge
-description: |
-  End-to-end frontend page UI pipeline: direction → implementation → motion
-  → delivery acceptance, producing polished pages without the "AI look".
-  Invoke when the user says any of:
-  - build a page / make a landing page
-  - redo this page's UI
-  - end-to-end frontend page
-  Chinese triggers: 帮我做一个页面 / 做一个落地页 / 把这个页面UI重做 / 前端页面一条龙
+description: 前端页面 UI 一条龙：定向→实现→动效→交付验收，产出无 AI 味高质感页面。触发：帮我做一个页面、做落地页、页面UI重做、前端页面一条龙、照这个页面复刻、参考某网页改我们的页面。
+
 ---
 
-# page-forge — end-to-end frontend page pipeline
+# page-forge — 前端页面 UI 全流程一条龙
 
-## Positioning
+## 定位
 
-From a one-line brief to a user-approved page, via a 4-phase pipeline. This skill only handles **orchestration, gates, and checkpoint management**; implementation details are delegated to `frontend-specialist` and `ui-verify` in the same repo. Target output: polished pages that don't look AI-generated.
+从一句话需求到用户亲眼验收的页面，四阶段流水线。本 skill 只做**编排、闸门、断点管理**；具体活全交给子 skill。产出目标：看不出 AI 味的高质感页面。
 
-## Trigger boundaries
+## 触发边界
 
-**Should invoke**: build a page / landing page / portfolio / marketing site / redo a page's UI / end-to-end frontend page.
+**应该调用**：做一个页面 / 落地页 / 作品集 / 官网页 / 重做某页 UI / 前端页面一条龙 / **照某参考页复刻或改做（含在复刻基础上改设计、加区块）**。
 
-**Should NOT invoke**:
-- Bug fixes, error chasing, single-property style tweaks
-- Pure backend / API / database work
-- User explicitly opts out
+**不应该调用**：
+- 修 bug、改报错、单点样式微调（→ skill-dispatcher 分流）
+- 纯后端 / API / 数据库
+- 用户明确说不用本 skill
 
-## Startup actions (every run)
+## 启动动作（每次必做）
 
-1. Determine the project root (ask the user or infer from context; never guess paths)
-2. Create the checkpoint dir `<project-root>/docs/page-forge/` and read `docs/page-forge/state.md` — **if it exists, resume from the recorded phase; never start over**. If not, initialize all four phases as pending
-3. Report the roadmap to the user: four phases + two user gates + expected pace
+1. 确定项目根目录（问用户或从上下文推断，不猜路径）
+2. 建 `<项目根>/docs/page-forge/` 断点目录，读 `docs/page-forge/state.md`——**存在则从记录的阶段续跑，不从头来**；不存在则初始化四阶段全 pending
+3. 报路线图给用户：四阶段 + 两个用户闸门 + 预计节奏
 
-## P1 Direction
+## P0 场景分流（入口必判，2026-11-03 定稿）
 
-Goal: lock down "what kind of page" before touching code.
+判据一句话：**用户给没给参考页作为版式的「答案」、以及满不满意这个答案**。参考物必须是**可捕获渲染结果的完整页面**（有 URL 可打开、或有整页截图）——设计规范/风格指南/零碎参考图不算，仍走 ③ 并入 P1 风格定向。三态分流，后续阶段按分流结果裁剪：
 
-1. Infer the brief — page type / mood words / reference sites / audience / brand assets (logo, colors, fonts). If the user provided reference images, those win
-2. Set direction with the taste dials from `taste-rules.md` (this dir): three dials (layout variance / motion intensity / visual density) + scenario presets
-3. Produce `docs/page-forge/brief.md`: style conclusions + anti-slop key points (no purple gradients, no centered hero + three equal cards, no emoji icons, no Inter + default blue, no full-page glassmorphism, no filler copy)
-4. **User Gate A**: present the style conclusions (optionally with 1-2 reference screenshots) for user confirmation. No page code before confirmation. "Up to you" = authorized to skip; record that in state.md
+**① 纯复刻（有参考页 + 全按它来）**
+- P1 风格定向**跳过**（答案被参考页钉死，风格自由度归零）；**闸门 A 视为由复刻指令本身替代**——但开工前仍须把「复刻范围 + 素材替换方案」报给用户过目再动代码
+- 版式按参考页在目标视口下**逐元素实测几何对齐**（量 computed styles / rect，不是目测仿）；动效走 P3 第 6 条 `reanimate`（捕获→反推→重建→数字验收 ±80ms）
+- **素材红线**：参考页的 logo / 广告图 / 商品图 / 品牌字体一律不搬，全部换用户自己的品牌物——布局机制可对齐，品牌资产不可复制
+- 验收走 P4 参考对齐环 + 动效数字验收（像素可因素材不同而异，时序参数必须达标）
 
-## P2 Implementation (frontend-specialist)
+**② 混跑（有参考页 + 部分不满意 / 要改 / 要新增）**
+- 先出**区块清单三类**供用户确认：满意（照参考）/ 要改（参考只是底子）/ 新增（参考没有）
+- 满意区块 → 按 ① 逆向对齐；要改/新增区块 → **该区块单独走正向出方案**（给 2-3 个设计方向供用户挑 → 拍板后实现；不必跑完整 P1 全页流程，只取其定向产物）
+- **设计令牌统一收口**：全页共用一套色彩/字体/间距令牌，复刻区块与设计区块不得各做各的成缝合怪
+- 被设计改动波及的复刻区块，**重跑 reanimate 动效验收**：像素可变（视觉换了），时序参数不变（动画没被改坏）
 
-1. Feed brief.md + taste-rule highlights to `frontend-specialist` to write the page code
-2. Hard rules (baked into the implementation requirements): black/white/gray base + one accent color; real copy — no Lorem ipsum or filler; icon library instead of emoji; spacing on a 4/8 scale; at most two font families
-3. When done, build/syntax checks must pass; mark P2 done in state.md
+**③ 纯正向（无参考页）**：按 P1-P4 原流程走，本节不改变任何原有行为。
 
-## P3 Motion (optional dependency)
+**①态的输入替代**：跳过 P1 即无 brief.md，实现阶段（P2）的输入改为「参考页实测几何数据 + 用户品牌素材清单」两样。
 
-Run only if the brief includes motion requirements or the user asked for a "lively feel"; skip for purely static admin pages.
+三态可在交付后**重入**：用户看过复刻产物说「这个区块我要改设计」→ 该区块转 ② 正向链出方案，其余不动。
 
-1. If GSAP-related skills are available (e.g. gsap-core / gsap-scrolltrigger), use them for hero motion and scroll triggers; **otherwise degrade gracefully** — CSS transitions/animations + Intersection Observer achieve equivalent effects. Never block on a missing dependency
-2. Pick from the four presets in `motion-presets.md` (this dir): hero entrance / scroll narrative / micro-interactions / count-up stats — each with a copy-paste skeleton, tuning table, and pitfalls. Motion budget per page: **one signature pattern + micro-interactions**; never stack all presets
-3. Micro-interactions follow the motion principles in `taste-rules.md`: UI motion <300ms, ease-out entrances, button `:active scale(0.97)`, animate only transform/opacity, respect `prefers-reduced-motion`
-4. Less is more: every motion effect must justify its purpose; delete the ones that can't
+**P0 规则软硬归位（按 quality-loop「闸门三层化」同类机制）**：
+- **Floor（脚本/机械可验，永不放行）**：实测几何数据必须产出并留档（rect/computed styles）；reanimate 时序数字必须达标；改版前机械抓全量清单（链接/字段/处理器——按 quality-loop「重设计安全带」）、改后逐项核对丢一判败；产物内不得出现参考页 CDN 域名的资源引用；构建通过
+- **Reflex（判断类，默认按规走，偏离须记录）**：区块三类的划分（应由用户确认，AI 不得替判）、动效档位取舍、风格方向选择——偏离默认处理时必须在交付说明记录理由
+- **Finish（打磨类，不挡交付）**：图标风格微调、间距微差、文案润色
 
-## P4 Delivery (ui-verify + taste checklist)
+## P1 定向（ui-ux-pro-max？+ frontend-design + design-taste-frontend）
 
-1. `ui-verify` starts a server and screenshots for acceptance: full page + key interaction states, at both desktop and mobile widths
-2. Self-check screenshots against the anti-slop list (the P1 key points + the checklist appendix in `taste-rules.md`); on failure, go back to P2, fix, re-screenshot
-3. **Quality score loop (optional enhancement, default on for new builds and redesigns)**: per `quality-loop.md` (this dir) — screenshot → score ten dimensions → fix the three weakest (concrete value changes) → re-shoot, max 3 rounds, bar = average ≥8 with no dimension under 7; skip for purely functional admin pages. Correctness problems still route through `ui-verify`; this loop only iterates on polish
-4. Run the interface safety checklist from `taste-rules.md` (keyboard reachable, touch targets ≥24px, visible focus, form conventions, dark mode)
-5. **User Gate B**: hand the screenshots (and before/after comparisons for redo tasks) to the user for visual sign-off. Delivered only when they pass
-6. After passing, mark state.md as delivered and shut down the browser/server processes used for acceptance
+目的：动代码之前把「做什么样的页面」定死。
 
-## Checkpoint resume
+0. **设计系统检索（可选增强，优雅降级）**：检查本机是否装有 `ui-ux-pro-max` skill（`~/.claude/skills/ui-ux-pro-max/scripts/search.py` 或项目 `.claude/skills/` 同路径存在即视为在）。
+   - **在**：以 brief 关键词（产品类型 + 受众；brief 未定稿就从用户原话提取）生成设计系统并存盘——Windows `py scripts/search.py "<关键词>" --design-system -f markdown`（macOS/Linux 用 `python3`），输出写 `docs/page-forge/design-system.md`（续跑时该文件已存在则直接复用，不重新生成）；再用同一关键词跑 `--domain style` 捞 1-2 个备选风格
+   - **不在**：静默跳过本步，state.md 记一句「无 ui-ux-pro-max，P1 走原生流程」，后续步骤照常
+1. 调 `frontend-design`：分析内容找设计方向（布局骨架、层次、基调）；有 design-system.md 时以其 Pattern（页面结构模式）为骨架参考
+2. 调 `design-taste-frontend` 的规则做风格定向：先推断 brief——页面类型 / 氛围词 / 参考站 / 受众 / 品牌资产（logo、色、字体）；用户给过参考图就以参考图为准
+3. **场景四问（推断，不审问，2026-10-29 定稿）**：AI 从上下文推断四个答案写进 brief 供用户纠正，不当提问清单逐条问：对谁说话 / 期望效果（转化信任型 vs 氛围创意型）/ 流量温度 / 决策成本——四问决定 P3 动效档位与 P4 验收侧重
+4. **风格轮换规则（2026-10-29 定稿，简化版）**：用户点名复用某次风格 → 照旧；用户说「差不多就行」→ 同族换旋钮（字阶/留白/密度/动效档换掉）；AI 自主且无参考 → **必须换风格族**（与近期产出及 archives.md 已存档取异，防千页一脸）
+5. 产出 `docs/page-forge/brief.md`：风格结论 + 四问假设 + 反 AI 味要点（禁紫渐变、禁居中 hero + 三等分卡片、禁 emoji 图标、禁 Inter+默认蓝、禁满屏玻璃拟态、文案禁空话）；有设计系统时，把选定的设计系统（Pattern / Style / Colors / Typography / Effects / AVOID / 交付检查表）作为**绑定约束**原文写进 brief
+6. **用户闸门 A**：给用户挑两样——①**体验方向菜单**（画报型 / 活网页型 / 功能应用型 / 混合型，每项一句样本式描述 + 工期量级；`archives.md` 有存档时附存档提名，AI 只提名、用户拍板）；②风格结论（可用 1-2 张参考截图佐证）。**有设计系统时：推荐风格与备选风格一起列给用户挑，不得默认采纳检索排名第一**——数据驱动≠审美正确，行业主流解容易撞款。确认前禁止写任何页面代码。用户说「随便/你定」= 授权跳过，在 state.md 记录
 
-- All state lives in `<project-root>/docs/page-forge/state.md`: per-phase pending/in_progress/done + brief path + one-line progress per completed phase
-- If a session is interrupted, re-trigger this skill: read state.md and continue from the first non-done phase
-- Mid-flight requirement changes: finish the current phase → update brief.md → re-run from P2 (P1 only re-runs if the style direction changed)
+## P2 实现（frontend-specialist）
 
-## Input / output
+1. 把 brief.md + taste 规则喂给 `frontend-specialist` 写页面代码
+2. 硬规则（写进实现要求）：黑白灰为主 + 一个强调色、真实文案不许用 Lorem/占位空话、图标用图标库不用 emoji、间距用尺度系统（4/8 基数）、字体最多两族；**brief 绑定了设计系统时，其色板/字体/风格/AVOID 为最高优先级硬约束**（色板逐项落成 CSS 变量），与本条冲突时以设计系统为准
+3. 完成后 `node --check` / 构建通过，state.md 记 P2 done
 
-Input: a one-line brief + (optional) reference images / reference sites / brand assets.
-Output: accepted page code + `docs/page-forge/brief.md` + acceptance screenshots.
+## P3 动效（gsap-core + gsap-scrolltrigger，按需）
 
-## Error handling and fallbacks
+仅当 brief 含动效需求或用户要过「有手感」时执行；纯静态后台页跳过。
 
-1. **Sub-skill invocation failure**: record the failed step, retry the same phase once; if it still fails, stop and report to the user — never guess onward
-2. **Build/runtime errors**: must be fixed before advancing; no moving forward with a broken state
-3. **Mid-flight requirement change**: follow the checkpoint-resume rerun rules
-4. **Destructive operations**: deleting, overwriting uncommitted files, pushing — ask the user first
-5. **Fallback**: if any phase dead-ends, hand the current artifacts + state.md to the user and explain where it's stuck
+1. `gsap-core` 做主动效，`gsap-scrolltrigger` 做滚动触发
+2. 选型直接用本目录 `motion-presets.md` 的四个预设（首屏入场/滚动叙事/微交互/数字滚动），按需加载该文件，含代码骨架+调参表+坑；**动效按四层规划（2026-10-29 起，替代单一预算制）**：环境层（背景氛围：视频/颗粒/漂浮）· 响应层（hover/focus/active 微交互）· 叙事层（滚动驱动：scrub/逐字点亮/sticky 段落——**不再一刀切禁止**，往往是全页签名所在）· 状态层（加载/成功/错误反馈）。档位按 P1 四问：转化信任型叙事层从简（≤1 处），氛围创意型环境+叙事可双开；同层内不叠多个签名；每处动效仍须说得出目的，说不出的删
+3. 微交互遵循 `design-taste-frontend` 附录 D（原 emil-design-eng）原则：UI 动效 <300ms、ease-out 进入、按钮 `:active scale(0.97)`、只动 transform/opacity、尊重 `prefers-reduced-motion`
+4. 动效宁少勿滥：每处动效说得出目的，说不出的删
+5. **动效禁止藏内容**：滚动显现类动画只能是渐进增强——内容默认可见可读，无 JS、打印、全页截图场景下全文照常出现（透明度初始值不许是 0 再等 JS 拉起来）
+6. **参考复刻走 `reanimate`（2026-11-02 接入，本机已实测）**：用户给了「动着的参考」并要求精确复刻动效时（参考站 URL 某区块 / mp4 录屏 / GIF / Lottie），调 `reanimate` skill 逐帧逆向+同法录制+数字验收（默认 motion-faithful 档 ±80ms），不凭感觉仿；只复刻动画行为，文案/配色/内容仍按本页方案；触发词窄，仅在用户明确指向某个动效参考时用
+
+## P4 交付（ui-verify + design-taste-frontend 附录 E）
+
+1. `ui-verify` 起服务截图验收：全页 + 关键交互态，桌面 + 移动两档；**截全页前先滚动一遍页面触发懒显现动画，再回到顶部截图**（防中段空白假象）
+2. 截图先自查 AI 味清单（P1 的反 AI 味要点逐条对），brief 绑定了设计系统时把其交付检查表（对比度 / focus / reduced-motion 等）并入自查，不合格回 P2 改完再截；任务带参考图/参考站截图（复刻/对齐类）时，按 ui-verify《参考对齐环》做指标清单+热力图机械对齐（2026-10-29 新增）
+3. **质感打分循环（可选增强，2026-10-29 自 motionsites-web-builder 吸收）**：新建/重做类页面在自查通过后，按本目录 `quality-loop.md` 跑「截图 → 十维评分 → 修最弱三项（带数值改法）→ 重拍」，≤3 轮、均分 ≥8 且单项无 <7 过线；纯后台功能页可跳。对错问题仍走 ui-verify，本循环只管质感。**重做类任务另按 `quality-loop.md` 第三节「重设计安全带」先抓全量链接/字段/处理器清单，改完逐项核对**；拦检与 AI 套路禁令按同文件「闸门三层化」（Floor 永不放行 / Reflex 推翻须记录 / Finish 不挡发布）
+4. `design-taste-frontend` 附录 E（原 web-interface-guidelines）的 MUST 清单兜底过一遍代码（键盘可达、触控目标 ≥24px、focus 可见、表单规范、暗色模式）
+5. **用户闸门 B**：截图 + 改前改后对比（重做类任务）给用户亲眼验收，通过才算交付
+6. **品牌口味存档（可选，2026-10-29 定稿；闸门 B 通过时顺带问一句，婉拒就不存）**：问用户本项目是否值得存档口味——是 → 把「四问答案 + 风格族 + 反 AI 味要点 + 签名机制」按标签（品牌名/页面类型）追加进全局 `~/.claude/skills/page-forge/archives.md`（不存在则创建），下次做同品牌页面时在 P1 闸门 A 提名复用，是否采纳由用户拍板
+7. 通过后 state.md 标 delivered，收掉浏览器进程（16GB 内存红线）
+
+## 断点续跑
+
+- 状态全部写在 `<项目根>/docs/page-forge/state.md`：四阶段各 pending/in_progress/done + brief 路径 + 每阶段结束时一句话进展
+- 会话中断后重新触发本 skill：读 state.md，从最后一个非 done 阶段继续
+- 用户中途改需求：完成当前阶段收尾 → 更新 brief.md → 从 P2 重跑（P1 只在风格变了才重跑）
+
+## 输入输出
+
+输入：一句话需求 + （可选）参考图/参考站/品牌资产。
+输出：验收通过的页面代码 + `docs/page-forge/brief.md` + 验收截图。
+
+## 错误处理与兜底
+
+1. **子 skill 调用失败**：记录失败步骤，同阶段重试一次；仍失败停下报告用户，不猜着继续
+2. **构建/运行报错**：修复后才许进下一阶段，禁止带病推进
+3. **需求中途变化**：按「断点续跑」的重跑规则处理
+4. **破坏性操作**：删除、覆盖未提交文件、推送，先问用户
+5. **兜底**：任何阶段卡死，把当前产物 + state.md 交给用户说明卡在哪
+
+## 运行期升级
+
+遇到以下情况调用 `scripts/notify.py` 发钉钉并暂停：
+
+- 需求模糊到无法产出 brief（且用户不回应澄清）
+- 同一阶段连续失败 2 次
+- 即将执行破坏性操作

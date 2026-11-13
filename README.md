@@ -28,7 +28,7 @@ page-forge's answer isn't a better prompt. It's **process**:
 
 | Skill | Role |
 |---|---|
-| `skills/page-forge` | The orchestrator: 4-phase pipeline + 2 user gates + checkpoint management + built-in style rules (`taste-rules.md`) |
+| `skills/page-forge` | The orchestrator: 4-phase pipeline + 2 user gates + checkpoint management + built-in style rules (merged into SKILL.md anti-slop checklist) |
 | `skills/frontend-specialist` | Implementation layer: responsive / a11y / animation performance / modern CSS standards |
 | `skills/ui-verify` | Acceptance layer: start server → screenshot & inspect → walk the interaction flows → deliver a pass/fail checklist |
 
@@ -66,7 +66,7 @@ Every project starts by setting three dials. All later layout / motion / density
 - **Motion intensity** 1 = static ↔ 10 = cinematic
 - **Visual density** 1 = gallery whitespace ↔ 10 = cockpit density
 
-Built-in presets per scenario (minimal editor 5/3/2, premium brand 7/5/3, landing page default 8/6/4…) — see `skills/page-forge/taste-rules.md`.
+Built-in presets per scenario (minimal editor 5/3/2, premium brand 7/5/3, landing page default 8/6/4…) — see the anti-slop checklist in `skills/page-forge/SKILL.md`.
 
 ## Credits
 

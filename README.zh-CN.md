@@ -26,7 +26,7 @@ page-forge 的答案不是换提示词，是**流程**：
 
 | skill | 职责 |
 |---|---|
-| `skills/page-forge` | 编排器：四阶段流水线 + 两个用户闸门 + 断点管理 + 内置风格规则（`taste-rules.md`） |
+| `skills/page-forge` | 编排器：四阶段流水线 + 两个用户闸门 + 断点管理 + 内置风格规则（已并入 SKILL.md 反 AI 味要点） |
 | `skills/frontend-specialist` | 实现层：响应式 / a11y / 动画性能 / 现代 CSS 的落地规范 |
 | `skills/ui-verify` | 验收层：起服务 → 截图看视觉 → 走交互流程 → 交付通过/失败清单 |
 
@@ -64,7 +64,7 @@ Windows 用户对应路径为 `C:\Users\<你>\.claude\skills\`。重启会话或
 - **动效强度** 1=静态 ↔ 10=电影感
 - **视觉密度** 1=画廊留白 ↔ 10=驾驶舱密排
 
-不同场景有内置预设（极简编辑器风 5/3/2，高级品牌风 7/5/3，落地页默认 8/6/4…），详见 `skills/page-forge/taste-rules.md`。
+不同场景有内置预设（极简编辑器风 5/3/2，高级品牌风 7/5/3，落地页默认 8/6/4…），已并入 `skills/page-forge/SKILL.md` 的反 AI 味要点。
 
 ## Credits
 
