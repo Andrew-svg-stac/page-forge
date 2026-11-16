@@ -1,89 +1,118 @@
-# quality-loop — 截图打分修循环 + 素材货架机制
+# quality-loop — screenshot-score-fix loop + media shelf mechanism
 
-> 2026-10-29 从 motionsites-web-builder skill 首跑吸收（NOIR hero + 多段页实测过线）。
-> 本文件是 P4 的可选增强，**不替代也不修改** ui-verify 的对错验收，也与六处待批修订无涉。
+> Optional P4 enhancement for new-build / redo page tasks. It scores and iterates on
+> *polish*; correctness acceptance (broken layout, console errors, failed flows)
+> stays with `ui-verify`. If the loop finds a correctness problem, route it back
+> through ui-verify first.
 
-## 一、拍图打分循环（新建/重做类页面默认开，纯后台功能页可跳过）
+## 1. The screenshot-score-fix loop
 
-在 P4 第 1-2 步（截图 + AI 味清单）之后追加。**分工**：对错验收（布局断/报错/交互不通）仍归 ui-verify 先行；本循环只管「质感够不够」，发现对错问题先回 ui-verify 流程。
+Run after the anti-slop self-check and the interface safety checklist in P4.
+Default on for new builds and redesigns; skip for purely functional admin pages.
 
-### 1. 评图前拦检（有任何一条 → 先修再评，不进打分）
+### 1.1 Blockers — fix before scoring (any one fails → repair first)
 
-- 控制台报错 / 资源加载失败 / 该动的视频图不动
-- 移动端横向溢出（scrollWidth > innerWidth）
-- 暗色设计在早期帧（加载 ~0.4s）出现白闪（html,body 首条 CSS 规则没设背景色）
-- 正文文字压在花图/视频上读不清，或对比 < 4.5:1
-- 标题字体没加载（font fallback 系统体）
-- 布局坏：不该叠的叠了 / 导航折行 / 首屏 CTA 被挤出视口
-- 占位文案（Lorem / "你的标语" / Feature 1）
+- Console errors / failed asset requests / a video or animated background that should play but doesn't
+- Horizontal overflow on mobile (`scrollWidth > innerWidth`)
+- White flash on dark designs in the first paint (page background not set on `html, body` as the first CSS rule)
+- Body text unreadable over imagery, or contrast below 4.5:1
+- Display font not loaded (headline falls back to a system font)
+- Broken layout: elements overlapping that shouldn't, nav wrapping to two lines, hero CTA pushed out of the viewport
+- Placeholder copy (Lorem ipsum, "Your tagline here", "Feature 1")
 
-### 2. 十维评分（每维 1-10，诚实打，陪审团心态）
+### 1.2 Score on ten dimensions (1–10 each, honestly, like a jury member)
 
-| # | 维度 | 看什么 |
+| # | Dimension | What to look at |
 |---|---|---|
-| 1 | 第一眼 | 3 秒测试：一个焦点、知道往哪看、像工作室做的不像模板 |
-| 2 | 签名 | 有没有一件值得截图传播的事（媒体/交互/字型时刻） |
-| 3 | 字型 | 大标题大而自信、字距紧；正文安静可读；≤2 族；无默认感 |
-| 4 | 构图留白 | 负空间是故意的；视线动线 首屏→信息→CTA；无孤儿元素 |
-| 5 | 色彩光 | 小色板+一个强调色用得有意图；媒体上的字有保护；深度靠层次不靠装饰 |
-| 6 | 媒体融合 | 图/视频/3D 像设计的一部分（裁切/定位/分层有意图），不是贴进去的矩形 |
-| 7 | 动效 | 入场有编排（错峰 0.6-1.2s、ease-out）；交互有物理感；无干扰循环；reduced-motion 有兜底 |
-| 8 | 移动端 | 不是"能堆下去"：字重标、媒体重裁、触达 ≥44px、签名还在 |
-| 9 | 文案 | 短、具体、有立场；CTA 动词开头；无空话 |
-| 10 | 抛光 | hover/focus 态、圆角一致、favicon/标题、无多余滚动条、无加载抖动 |
+| 1 | First glance | The 3-second test: one focal point, you know where to look, feels intentional — studio work, not a template |
+| 2 | Signature | One thing worth screenshotting and sharing (media, interaction, or a type moment) |
+| 3 | Typography | Display type big, confident, tightly tracked; body calm and readable; ≤2 families; nothing default-looking |
+| 4 | Composition & space | Deliberate negative space; eye travels hero → message → CTA; no clutter, no orphaned elements |
+| 5 | Colour & light | Small palette, one accent used with intent; text protected over media; depth from layering, not decoration |
+| 6 | Media integration | Image/video/3D feels part of the design (crop, position, layering on purpose), not a rectangle dropped in |
+| 7 | Motion | Choreographed entrance (staggered, 0.6–1.2s, ease-out); physical interactions; no distracting loops; reduced-motion respected |
+| 8 | Mobile | Not just stacked: type rescaled, media re-cropped, tap targets ≥44px, the signature survives |
+| 9 | Copy | Short, specific, has a point of view; verb-first CTA; zero filler |
+| 10 | Polish | Hover/focus states, consistent radii, favicon/title, no stray scrollbars, no layout shift on load |
 
-**过线 = 均分 ≥8 且单项无 <7。** 首版普遍 6-7 分，正常——修才是价值。
+**The bar: average ≥8 with no dimension under 7.** First drafts usually land at 6–7 —
+that's normal; the fixing is where the value is.
 
-### 3. 修循环（≤3 轮）
+### 1.3 The fix loop (max 3 rounds)
 
-1. 挑**最弱的 3 项**，每项写带数值的具体改法（禁形容词）：
-   - ✅「H1 从 64px 提到 clamp(56px, 8vw, 128px)，tracking -0.04em」
-   - ❌「标题再大气一点」
-2. 改 → 重截 → 重看 → 重打分
-3. 3 轮仍不过线：停下，把分数表 + 卡点如实交给用户人判（闸门 B 本来就要人来）
-4. 高频修法速查：看着普通→字放大词砍少/砍段；看着挤→删装饰、半径统一、留白加一档、色板收到 bg/ink/muted/accent；看着平→加媒体层/scrim/细颗粒/玻璃面；字打架媒体→字挪到画面安静区或加 scrim；移动端烂→object-position 重裁 + clamp 缩字 + 次导航收进菜单
+1. Pick the **three weakest dimensions**; write a concrete, value-carrying change for each (no adjectives):
+   - Good: "H1 from 64px to `clamp(56px, 8vw, 128px)`, tracking −0.04em"
+   - Bad: "make the headline bolder"
+2. Fix → re-screenshot → re-look → re-score
+3. Still below the bar after 3 rounds: stop, hand the score table and blockers to the
+   user — User Gate B is a human decision anyway
+4. High-frequency fixes: looks generic → bigger type, fewer words, stronger signature, cut a section;
+   looks busy → remove decoration, unify radii, one step more whitespace, palette down to bg/ink/muted/accent;
+   looks flat → add a media layer, scrim, subtle grain, or glass surface;
+   text fights media → move text to the calm zone or add a scrim;
+   mobile broken → re-crop with `object-position`, `clamp()` the type, collapse secondary nav into a menu
 
-## 二、素材货架机制（解决"每次现找素材又慢又撞款"）
+## 2. Media shelf mechanism (stop hunting for assets every build)
 
-### 机制（可复用的做法，不是某家库存）
+### The mechanism (reusable pattern, not any specific stockpile)
 
-1. **货架三件套**：`MEDIA.md` 索引表（编号/类型/尺寸/来源/URL）+ 若干张**编号 contact sheet 图**（缩略图拼版，让人/模型"看着选"）+ 素材本体远程托管（页面只引用 URL，货架不进项目仓库）
-2. **选法**：先看 contact sheet 定眼缘 → 回 MEDIA.md 拿对应编号 URL → 页面引用；**编号映射必须以索引表为准**，凭缩略图行号记忆容易错位（10-29 实战：#13 亮色键盘 ≠ #16 蓝丝绸，气质全反）
-3. **来源要求**：免版权/可商用、免梯子可直连或走代理、风格成体系（一个货架一种气质，不混拼）
+1. **Three pieces**: a `MEDIA.md` index table (number / type / size / source / URL) +
+   numbered **contact sheets** (thumbnail boards so a human or a model can pick by eye) +
+   the assets themselves hosted remotely (pages reference URLs; the shelf never lives inside project repos)
+2. **Selection discipline**: browse the contact sheet first, then take the exact URL from
+   `MEDIA.md` by number. **The index table is the source of truth for numbering** — picking
+   from thumbnail row-memory caused a real mismatch (a bright keyboard clip taken for a
+   dark silk ribbon; same shelf, adjacent numbers, opposite moods)
+3. **Sourcing rules**: free/commercial-usable licenses, reachable from your network, and
+   stylistically coherent (one shelf = one mood; don't collage across shelves)
 
-### 本机现成货架
+### Optional ready-made shelf
 
-| 货架 | 位置 | 内容 | 授权边界 |
-|---|---|---|---|
-| motionsites-web-builder 媒体架 | `C:\Users\Administrator\.claude\skills\motionsites-web-builder\media\` | 52 个电影感 hero 视频 + 3D 透明抠图 + 图片，CloudFront 托管 | 仅限「用该 skill 建的站」内引用；**货架文件留原地，禁拷贝进任何仓库**（其 prompt/媒体 © MotionSites）；访问需代理 |
+If the [Motionsites-AI/claude-skill](https://github.com/Motionsites-AI/claude-skill) skill is
+installed locally, its media shelf (50+ cinematic hero videos, transparent 3D cut-outs,
+images, publicly hosted) can serve as a ready-made shelf for cinematic hero work — respect
+its license terms (shelf content remains © MotionSites; usable in sites built with that
+skill; keep shelf files where they are, never copy them into repos). User-owned assets
+always come first; lawful free sources (Unsplash / Pexels / Pixabay) are the fallback for
+building your own shelf.
 
-自建货架时 lawful 来源：Unsplash / Pexels / Pixabay（免费可商用，注意部分需梯子）；品牌项目优先用甲方自己的素材（skill 流程本来就把"用户自有素材"排第一）。
+## 3. Absorbed from Hallmark (mechanisms only — the tool itself is not bundled)
 
-### 开源同步注意
+> Source: [Nutlope/hallmark](https://github.com/Nutlope/hallmark) (MIT). Hallmark is a
+> self-contained mini-pipeline that would clash with page-forge's orchestrator, so only
+> the mechanisms are absorbed.
 
-本文件进 GitHub 仓库（D:\GitHub-Projects\page-forge）前过既有 sanitize 流程：本机绝对路径、第三方 skill 名（motionsites）改中性表述或删行；货架只写「机制」，不带任何第三方库存。
+### 3.1 Three-tier gates (split the one-vote blocker list into tiers with different strictness)
 
-## 三、自 Hallmark 吸收（2026-10-29 评估后决定：吸收机制，不装本体）
-
-> 来源：[Nutlope/hallmark](https://github.com/Nutlope/hallmark)（41k 星，MIT，Together AI）。本体是自成一体的小流水线，与 page-forge 双编排者冲突，故只取机制。
-
-### 1. 闸门三层化（把「一票拦检」细分成三层，松紧有别）
-
-| 层 | 性质 | 处置 |
+| Tier | Nature | Handling |
 |---|---|---|
-| **Floor** | 对错底线：上面第 1 节的 7 条拦检 + 对比度/focus/reduced-motion/编造事实/手机端布局坏 | **永不放行**，修完才许进评分 |
-| **Reflex** | AI 默认套路：每个标题上都有 eyebrow、大写加宽字距小标签满天飞、标题里恰好一个彩色词、整页空框子或全是照片没文字、每页结尾都长邮箱订阅、表单说谢谢但啥也没发出去 | 默认禁；**有理由可推翻，但必须在交付说明里记录理由**（哪页、哪条、为何） |
-| **Finish** | 手艺细节：字距微调、断词优化、焦点环样式 | 不挡发布，进打磨清单按余力做 |
+| **Floor** | Correctness floor: the 7 blockers in §1 + contrast / focus / reduced-motion / fabricated facts / broken mobile layout | **Never waived** — fix before scoring |
+| **Reflex** | AI default tics: an eyebrow on every heading, all-caps letter-spaced labels everywhere, exactly one colored word in each headline, all empty frames or all photos with no text, newsletter signup at the foot of every page, forms that say "thanks" but send nothing | Banned by default; **overridable with a reason, but the reason must be recorded in the delivery notes** (which page, which rule, why) |
+| **Finish** | Craft details: letter-spacing tweaks, text-wrap balancing, focus-ring styling | Never blocks shipping; goes on the polish list as capacity allows |
 
-### 2. 机械 lint 思路（脚本抓 AI 特征，不只靠眼睛）
+### 3.2 Mechanical lint (scripts catch AI fingerprints, not just eyes)
 
-机制：渲染实测多档宽度 + 脚本化特征检查（重复 eyebrow 结构、全大写+字距标签计数、彩色词定位等），再配一个**全新上下文的子代理冷眼复审**（没看过代码，只看渲染图，避免「写的人觉得自己没问题」）。
-可选工具路径：MIT 允许直接用其脚本——`git clone nutlope/hallmark` 后 `node skills/hallmark/scripts/sloplint.mjs <文件或目录> --render`（需 Node 18+ + puppeteer-core + Chrome，本机都有；静态检查无需浏览器）。用不用看当天网络与心情，机制在手里就行。
+The mechanism: render at several widths + scripted feature checks (repeated eyebrow
+structures, count of all-caps letter-spaced labels, colored-word positions, …), paired
+with a **cold-eyes re-review by a fresh-context subagent** — one that has never seen the
+code and only looks at the rendered screenshots, avoiding "the author thinks it's fine".
+Optional tooling: hallmark's `sloplint` script is MIT — `git clone nutlope/hallmark`,
+then `node skills/hallmark/scripts/sloplint.mjs <file-or-dir> --render` (needs Node 18+
+plus puppeteer-core and Chrome; static checks work without a browser). Using it on any
+given day is optional; having the mechanism on hand is the point.
 
-### 3. 重设计安全带（改版保命，重做类任务必走）
+### 3.3 Redesign safety belt (mandatory for redo tasks)
 
-重做/改版已有页面时，**动手前先机械抓取全量清单**：所有链接、表单字段、交互处理器（onclick/submit 类）、标题层级。改完后逐项核对——**丢一个链接/字段/处理器 = 判失败，回滚重做**，不许「功能差不多就行」。交付必须带改前/改后并排对比。
+When redesigning an existing page, **mechanically capture the full inventory before
+touching anything**: every link, every form field, every interaction handler
+(`onclick`/`submit`-class), the heading hierarchy. After the redesign, verify
+item-by-item — **one missing link / field / handler = fail, roll back and redo**;
+"it's mostly all there" is not a pass. Delivery must include before/after
+side-by-side comparisons.
 
-### 4. 主题样本来源（喂 P1 闸门 A 的方向菜单）
+### 3.4 Theme sample source (feeds the P1 Gate A direction menu)
 
-[usehallmark.com](https://www.usehallmark.com) 上 50 个主题各带成品页截图，可作方向菜单的样本描述来源（引用描述与气质，不拷其文件）； motionsites 货架（本文件第二节）与用户自有素材照旧优先。
+[usehallmark.com](https://www.usehallmark.com) shows 50 themes, each with finished-page
+screenshots — a good source of sample descriptions for the direction menu (borrow the
+descriptions and mood, never the files). The media shelf (§2) and user-owned assets
+still come first.
