@@ -87,6 +87,98 @@ Report problems before fixing; don't change things unilaterally.
 4. Add to the delivery checklist: `Blast radius: this change touched A; also checked B (pass) / C (not checked, reason)`
 5. If the blast radius turns out bigger than expected (touching shared artifacts / multiple pages affected) → stop and escalate instead of shipping in a broken state
 
+## Mobile incremental checks (initial 2026-10-20, revised in practice)
+
+> Applies to responsive web / H5 mobile pages. The main workflow is unchanged; this
+> section kicks in when choosing the viewport and the checks. It is a first cut of
+> general engineering practice — revise it as real projects hit issues; don't treat
+> it as a hard rule set yet.
+
+**Endpoint decision (before screenshots)**: PC pages use the project's PC baseline
+viewport; mobile pages / mobile projects use the mobile baseline (default **375×812**,
+align to the project's existing baseline if it has one). **Mobile evidence must be
+shot at the mobile viewport — anything shot at PC width doesn't count.**
+
+**Viewport baseline**: default 375×812. CLI: `set viewport 375 812`.
+
+**Five incremental checks (what the PC baseline doesn't cover)**:
+
+> Meaning of the label: these are *additions checked at the mobile viewport*, not
+> "never checked on PC" — check 1 also runs on PC (at PC width); the other four are
+> mobile-specific.
+
+1. **Breakpoint breakage**: horizontal scrollbar appears (measure `scrollWidth > innerWidth`), text overflow / vertical wrapping, card misalignment
+2. **Touch targets (measured, not eyeballed)**: every key tappable element gets a `getBoundingClientRect` reading; **<44×44px = red, report the concrete value**; adjacent tappables closer than 8px apart risk mis-taps (2026-11-16: upgraded from qualitative to mechanical)
+3. **Soft-keyboard occlusion**: after focusing an input, does the keyboard cover the input area / send button (chat pages are the disaster zone; emulation can't test this — see simulation boundary)
+4. **Hover dead-ends**: menus/tooltips that only appear on hover are unreachable on mobile
+5. **Safe area**: the iPhone home indicator must not cover key buttons
+
+**Key-button geometry archive (2026-11-16)**: record x/y/width/height of the hero CTA
+and every key interactive button in the acceptance notes. Criteria: fully inside the
+viewport (not clipped, not covered by the keyboard or the home indicator), tap area
+≥44×44. Acceptance only accepts measured numbers, never "looks fine".
+
+**Mobile variant or not**: decide by "do real users of this path use it on a phone" —
+phone-used paths get a mobile variant; purely desktop paths (e.g. an admin console)
+don't; for mobile-first projects it inverts — device emulation is the default form.
+
+**Simulation boundary**: layout is genuinely laid out at phone width (media queries
+really fire), so breakpoint breakage / horizontal overflow / functional loops can be
+caught automatically; **soft-keyboard occlusion, Safari-specific quirks, performance,
+and camera permissions cannot be tested in emulation** — those need a human final pass
+on a real phone over LAN (`vite npm run dev -- --host`, then open the Network address
+on the phone); human-only items never enter the spec-snapshot chain.
+**Root-cause tip (for the implementation side, not an acceptance criterion)**: the
+high-frequency root cause of mobile breakpoint breakage is fixed-px absolute
+positioning / fixed-width containers — prefer flex/grid + relative units
+(% / `clamp()` / `min()`). Acceptance still only measures behavior (did it break, is
+the button where it should be), and **never checks which CSS technique was used**.
+
+**Snapshot difference**: the spec uses a Playwright device descriptor for emulation
+(e.g. `devices['iPhone 13']` — one call sets viewport + touch + UA + DPR); add one
+extra assertion: no horizontal overflow, `document.scrollWidth <= window.innerWidth`.
+
+**Boundary (toolchain follows the form factor — enable when touched, don't pre-open)**:
+WeChat mini-programs are out of Playwright's reach → `miniprogram-automator` + WeChat
+devtools; native apps → Maestro/Appium + real-device rules (emulator pass ≠ device pass).
+
+## Replica acceptance in one command (2026-11-16)
+
+For HTML-demo replication tasks, the pixel alignment loop plus the computed-style
+checklist plus interaction comparison are packaged into one script:
+
+```bash
+PYTHONUTF8=1 python scripts/replica-check.py <ref-demo.html> <replica.html> \
+  --viewports 1920x1080,1366x768 --checks checks.json --out report
+```
+
+It automatically screenshots both pages (forcing all scroll containers to settle first
+— smooth-scroll transients used to produce fake diff hotspots), diffs computed styles
+element-by-element (auto-collects every class selector × 21 key properties), runs the
+pixel diff + 10-band heatmap, runs the interaction comparison (`--checks` takes
+`[{"name","js"}]`; each JS expression runs on both pages and the outputs must match),
+then prints a PASS/FAIL verdict and writes `summary.md` with screenshots, heatmaps,
+and the full diff list. Measured baseline: a same-source replica passes 102 selectors ×
+21 properties × 2 viewports with 0.00% pixel diff; tampering a single color value gets
+caught red (self-validated in both directions).
+
+**Mobile replica**: same command, swap `--viewports 375x812` and pass the bundled
+`scripts/mobile-checks.json` (4 mechanical checks: horizontal overflow, per-element
+44px touch targets, CTA geometry + in-viewport, tappable spacing <8px; adjust the CTA
+selector). **Caveat: parity green means the two pages match, not that either is good**
+— read the returned values by hand (real demos commonly have several sub-44px targets;
+a full-screen overlay makes the spacing check count covered buttons as noise).
+Soft-keyboard / Safari quirks / real safe-area pressure stay with the human device pass.
+
+**When class names differ between the two sides (HTML→Vue scenario)**: a component
+port rewrites class names (e.g. scoped-CSS transforms). Default auto-collection then
+misfires (measured: renaming 73 structural classes → 71 selector mismatches, FAIL) —
+but **the pixel layer is class-agnostic and stays 0.00%**, so in that scenario: treat
+the pixel layer as the primary evidence, and pass `--selectors` with a mapping table
+of selectors that exist on both sides (`#historyDrawer`, `[aria-label="…"]` — ids and
+attribute selectors work; they are resolved in the page, not filtered from the class
+universe). Measured: 12 mapped selectors × 21 properties, 0 diff → PASS.
+
 ## Example output format
 
 ```
