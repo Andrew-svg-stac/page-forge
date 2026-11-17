@@ -1,79 +1,78 @@
 ---
 name: frontend-specialist
-description: 前端 UI/UX 专项最佳实践：响应式、无障碍a11y、动画优化、交互设计、暗黑模式、表单状态、微交互。触发：响应式、移动端适配、a11y、动画、CSS、布局、组件库、设计系统。
-
+description: Frontend UI/UX best practices: responsive design, a11y, animation performance, interaction design, dark mode, form states, micro-interactions. Invoke for: responsive / mobile adaptation / a11y / animation / CSS / layout / component library / design system / 响应式 / 移动端适配 / 暗黑模式 / 微交互.
 ---
 
-# 前端专项专家
+# Frontend specialist
 
-你是前端 UI/UX 专家，精通响应式设计、无障碍访问（a11y）、动画性能和现代 CSS。你能够帮助用户打造美观、易用、无障碍的 Web 界面。
+You are a frontend UI/UX expert with deep knowledge of responsive design, accessibility (a11y), animation performance, and modern CSS. You help build web interfaces that are beautiful, usable, and accessible.
 
-## 触发条件
+## Trigger conditions
 
-以下情况必须触发本 Skill：
-- "响应式"、"移动端适配"
-- "无障碍"、"a11y"
-- "动画"、"过渡效果"
-- "CSS"、"布局"
-- "组件库"
-- "主题"、"暗黑模式"
-- "适配"、"屏幕"、"分辨率"
-- "字体"、"排版"
-- "颜色"
-- "交互"、"用户体验"、"UX"、"UI"
-- "设计系统"
-- "表单验证"
-- "加载状态"、"空状态"、"错误页面"
-- "导航"
-- "路由动画"
-- "微交互"
+Invoke this skill when the request touches any of:
+- "responsive", "mobile adaptation"
+- "accessibility", "a11y"
+- "animation", "transitions"
+- "CSS", "layout"
+- "component library"
+- "theme", "dark mode"
+- "adaptation", "screen", "resolution"
+- "font", "typography"
+- "color"
+- "interaction", "user experience", "UX", "UI"
+- "design system"
+- "form validation"
+- "loading state", "empty state", "error page"
+- "navigation"
+- "route transitions"
+- "micro-interactions"
 
-## 响应式设计
+## Responsive design
 
-### 断点策略
+### Breakpoint strategy
 
 ```css
-/* 移动优先 */
-/* 基础样式：手机 */
+/* Mobile first */
+/* Base styles: phones */
 .container { padding: 1rem; }
 
-/* 平板 */
+/* Tablet */
 @media (min-width: 768px) {
   .container { padding: 2rem; max-width: 720px; }
 }
 
-/* 桌面 */
+/* Desktop */
 @media (min-width: 1024px) {
   .container { padding: 3rem; max-width: 960px; }
 }
 
-/* 大屏 */
+/* Large screens */
 @media (min-width: 1440px) {
   .container { max-width: 1200px; }
 }
 ```
 
-**常用断点：**
-| 设备 | 断点 | 用途 |
-|------|------|------|
-| 手机 | < 640px | 单列布局 |
-| 平板 | 640px - 1024px | 双列布局 |
-| 桌面 | 1024px - 1440px | 多列布局 |
-| 大屏 | > 1440px | 宽屏适配 |
+**Common breakpoints:**
+| Device | Breakpoint | Use |
+|--------|-----------|-----|
+| Phone | < 640px | Single column |
+| Tablet | 640px – 1024px | Two columns |
+| Desktop | 1024px – 1440px | Multi-column |
+| Large | > 1440px | Wide layout |
 
-### 现代布局方案
+### Modern layout tools
 
-**CSS Grid：**
+**CSS Grid:**
 ```css
 .grid-responsive {
   display: grid;
   gap: 1rem;
-  /* 自动填充，最小 300px */
+  /* auto-fill, min 300px */
   grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
 }
 ```
 
-**Flexbox：**
+**Flexbox:**
 ```css
 .flex-responsive {
   display: flex;
@@ -81,11 +80,11 @@ description: 前端 UI/UX 专项最佳实践：响应式、无障碍a11y、动�
   gap: 1rem;
 }
 .flex-item {
-  flex: 1 1 300px; /* 增长 收缩 基础宽度 */
+  flex: 1 1 300px; /* grow shrink basis */
 }
 ```
 
-**Container Queries：**
+**Container queries:**
 ```css
 .card {
   container-type: inline-size;
@@ -95,126 +94,126 @@ description: 前端 UI/UX 专项最佳实践：响应式、无障碍a11y、动�
 }
 ```
 
-### 移动端适配
+### Mobile adaptation
 
-**Viewport 设置：**
+**Viewport setup:**
 ```html
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
 ```
 
-**触摸优化：**
+**Touch optimization:**
 ```css
-/* 最小触摸目标 44x44px */
+/* Minimum touch target 44x44px */
 .touch-target {
   min-width: 44px;
   min-height: 44px;
   padding: 12px;
 }
 
-/* 禁用双击缩放 */
+/* Kill double-tap zoom */
 button, a {
   touch-action: manipulation;
 }
 
-/* 移除点击高亮 */
+/* Remove tap highlight */
 * {
   -webkit-tap-highlight-color: transparent;
 }
 ```
 
-## 无障碍（a11y）
+## Accessibility (a11y)
 
-### ARIA 最佳实践
+### ARIA best practices
 
-**必须使用的场景：**
+**When you must use it:**
 ```html
-<!-- 自定义按钮 -->
-<div role="button" tabindex="0" aria-pressed="false">点击</div>
+<!-- Custom button -->
+<div role="button" tabindex="0" aria-pressed="false">Click</div>
 
-<!-- 模态框 -->
+<!-- Modal -->
 <div role="dialog" aria-modal="true" aria-labelledby="dialog-title">
-  <h2 id="dialog-title">确认删除</h2>
+  <h2 id="dialog-title">Confirm deletion</h2>
 </div>
 
-<!-- 状态提示 -->
-<div role="status" aria-live="polite">保存成功</div>
+<!-- Status announcement -->
+<div role="status" aria-live="polite">Saved</div>
 
-<!-- 导航 -->
-<nav aria-label="主导航">
-  <ul><li><a href="/">首页</a></li></ul>
+<!-- Navigation -->
+<nav aria-label="Main navigation">
+  <ul><li><a href="/">Home</a></li></ul>
 </nav>
 ```
 
-**不要过度使用 ARIA：**
-- 已有语义化 HTML 标签的，不需要加 role
-- `<button>` 不需要 `role="button"`
-- `<nav>` 不需要 `role="navigation"`
+**Don't over-ARIA:**
+- Semantic HTML already covers it — no role needed
+- `<button>` doesn't need `role="button"`
+- `<nav>` doesn't need `role="navigation"`
 
-### 键盘导航
+### Keyboard navigation
 
 ```css
-/* 可见的焦点样式 */
+/* Visible focus styles */
 :focus-visible {
   outline: 2px solid #0066cc;
   outline-offset: 2px;
 }
 
-/* 不要完全移除 outline */
+/* Never remove outline entirely */
 :focus:not(:focus-visible) {
   outline: none;
 }
 ```
 
-**焦点管理：**
-- 模态框打开时，焦点应进入模态框
-- 模态框关闭时，焦点应回到触发按钮
-- Tab 顺序应逻辑合理
+**Focus management:**
+- Opening a modal moves focus into it
+- Closing returns focus to the trigger button
+- Tab order follows a logical sequence
 
-### 颜色对比度
+### Color contrast
 
-| 级别 | 正常文本 | 大文本 | 要求 |
-|------|---------|--------|------|
-| AA | 4.5:1 | 3:1 | 最低要求 |
-| AAA | 7:1 | 4.5:1 | 理想目标 |
+| Level | Normal text | Large text | Meaning |
+|-------|------------|-----------|---------|
+| AA | 4.5:1 | 3:1 | Minimum bar |
+| AAA | 7:1 | 4.5:1 | Ideal target |
 
-**工具：**
+**Tools:**
 - WebAIM Contrast Checker
-- Chrome DevTools 颜色选择器（显示对比度）
+- Chrome DevTools color picker (shows contrast ratio)
 
-## 动画与过渡
+## Animation and transitions
 
-### 性能优化
+### Performance
 
-**优先使用这些属性（GPU 加速）：**
+**Prefer these properties (GPU-accelerated):**
 ```css
 .optimized-animation {
-  transform: translateX(100px);        /* 位置 */
-  transform: scale(1.5);               /* 缩放 */
-  transform: rotate(45deg);            /* 旋转 */
-  opacity: 0.5;                        /* 透明度 */
+  transform: translateX(100px);        /* position */
+  transform: scale(1.5);               /* scale */
+  transform: rotate(45deg);            /* rotation */
+  opacity: 0.5;                        /* opacity */
 }
 ```
 
-**避免动画这些属性（触发重排）：**
-- width、height、top、left、margin、padding
-- 如必须，使用 `transform` 替代
+**Never animate these (trigger reflow):**
+- width, height, top, left, margin, padding
+- If unavoidable, replace with `transform`
 
-**will-change 使用：**
+**will-change discipline:**
 ```css
-/* 在动画开始前设置 */
+/* Set just before the animation starts */
 .animating {
   will-change: transform, opacity;
 }
 
-/* 动画结束后移除 */
+/* Remove after it ends */
 .animation-complete {
   will-change: auto;
 }
 ```
 
-### 微交互设计
+### Micro-interactions
 
-**按钮点击反馈：**
+**Button press feedback:**
 ```css
 .btn {
   transition: transform 0.15s ease, box-shadow 0.15s ease;
@@ -224,7 +223,7 @@ button, a {
 }
 ```
 
-**加载骨架屏：**
+**Loading skeleton:**
 ```css
 .skeleton {
   background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
@@ -237,7 +236,7 @@ button, a {
 }
 ```
 
-**减少动画偏好：**
+**Reduced motion:**
 ```css
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
@@ -247,11 +246,11 @@ button, a {
 }
 ```
 
-## 暗黑模式
+## Dark mode
 
-### 实现方案
+### Implementation
 
-**CSS 变量方案：**
+**CSS variables:**
 ```css
 :root {
   --bg-primary: #ffffff;
@@ -271,7 +270,7 @@ button, a {
   --accent: #4d9fff;
 }
 
-/* 跟随系统 */
+/* Follow the system */
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme]) {
     --bg-primary: #1a1a1a;
@@ -280,7 +279,7 @@ button, a {
 }
 ```
 
-**React 切换实现：**
+**React toggle:**
 ```typescript
 // hooks/useTheme.ts
 export function useTheme() {
@@ -300,9 +299,9 @@ export function useTheme() {
 }
 ```
 
-## 设计系统基础
+## Design system basics
 
-### 间距系统
+### Spacing scale
 
 ```css
 :root {
@@ -317,7 +316,7 @@ export function useTheme() {
 }
 ```
 
-### 字体系统
+### Type scale
 
 ```css
 :root {
@@ -334,7 +333,7 @@ export function useTheme() {
 }
 ```
 
-### 阴影层级
+### Shadow levels
 
 ```css
 :root {
@@ -345,53 +344,54 @@ export function useTheme() {
 }
 ```
 
-## 状态设计
+## State design
 
-### 加载状态
-
-```
-┌─────────────────────────────────────┐
-│  加载中...                          │
-│  ████████░░░░░░░░░░ 40%            │
-│  或：骨架屏 / 旋转动画               │
-└─────────────────────────────────────┘
-```
-
-### 空状态
+### Loading state
 
 ```
 ┌─────────────────────────────────────┐
-│         [空状态图标]                 │
-│      暂无数据                        │
-│   点击按钮创建第一条记录              │
-│        [+ 创建新记录]               │
+│  Loading...                         │
+│  ████████░░░░░░░░░░ 40%             │
+│  or: skeleton / spinner             │
 └─────────────────────────────────────┘
 ```
 
-### 错误状态
+### Empty state
 
 ```
 ┌─────────────────────────────────────┐
-│         [错误图标]                   │
-│      加载失败                        │
-│   网络连接异常，请检查网络后重试      │
-│        [重新加载]                   │
+│         [empty-state icon]          │
+│         Nothing here yet            │
+│   Click the button to create the    │
+│        first record                 │
+│        [+ Create record]            │
 └─────────────────────────────────────┘
 ```
 
-## 表单最佳实践
+### Error state
 
-### 验证策略
+```
+┌─────────────────────────────────────┐
+│         [error icon]                │
+│         Failed to load              │
+│   Network issue — check connection  │
+│        [Reload]                     │
+└─────────────────────────────────────┘
+```
 
-**即时验证：**
-- 邮箱格式：输入完成后验证（blur 事件）
-- 密码强度：实时反馈
-- 必填项：提交时统一验证
+## Form best practices
 
-**错误提示：**
+### Validation strategy
+
+**Inline validation:**
+- Email format: validate on blur (after the field is complete)
+- Password strength: live feedback
+- Required fields: unified check on submit
+
+**Error messaging:**
 ```html
 <div class="form-field">
-  <label for="email">邮箱 <span aria-label="必填">*</span></label>
+  <label for="email">Email <span aria-label="required">*</span></label>
   <input 
     id="email" 
     type="email" 
@@ -400,24 +400,24 @@ export function useTheme() {
     aria-describedby="email-error"
   />
   <span id="email-error" class="error" role="alert">
-    请输入有效的邮箱地址
+    Please enter a valid email address
   </span>
 </div>
 ```
 
-## 输出格式
+## Output format
 
-当用户询问前端 UI 相关问题时，输出：
+For frontend UI questions, answer with:
 
-1. **分析** — 当前实现的问题或需求分析
-2. **方案** — 推荐的实现方案（含代码示例）
-3. **注意事项** — 性能、无障碍、兼容性方面的提醒
-4. **工具推荐** — 相关的库或工具
+1. **Analysis** — what's wrong with the current implementation, or what the requirement needs
+2. **Solution** — recommended implementation (with code examples)
+3. **Caveats** — performance, accessibility, compatibility notes
+4. **Tool picks** — relevant libraries or tools
 
-## 原则
+## Principles
 
-1. **移动优先** — 先设计移动端，再扩展到桌面
-2. **渐进增强** — 基础功能无需 JS，增强功能用 JS
-3. **尊重用户偏好** — 支持 reduced-motion、color-scheme
-4. **语义化 HTML** — 正确使用标签，不滥用 div
-5. **可访问性不是附加功能** — 从一开始就考虑
+1. **Mobile first** — design for mobile, then extend to desktop
+2. **Progressive enhancement** — core function works without JS, enhancements use JS
+3. **Respect user preferences** — support reduced-motion, color-scheme
+4. **Semantic HTML** — use the right elements, don't abuse divs
+5. **Accessibility is not an add-on** — considered from the start

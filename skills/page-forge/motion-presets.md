@@ -102,7 +102,7 @@ if (!reduced) {
 
 ## Preset 3 — Micro-interactions (hover / press feedback)
 
-**When**: every interactive surface. This is "手感", not decoration. All <300ms.
+**When**: every interactive surface. This is "tactile feel", not decoration. All <300ms.
 
 ```css
 /* Press: the single highest-value line in this file */
@@ -178,9 +178,9 @@ document.querySelectorAll('.stat-num').forEach((el) => {
 
 | Brief says | Use |
 |---|---|
-| "第一印象要惊艳" / striking first impression | 1 + 3 |
-| "讲清楚流程/产品故事" | 2 + 3 |
-| "要有数据说服力" | 4 + 3 |
-| "要手感" | 3 alone |
+| "striking first impression" | 1 + 3 |
+| "clearly tell the flow / product story" | 2 + 3 |
+| "convince with data" | 4 + 3 |
+| "make it feel tactile" | 3 alone |
 
 Never stack 1+2+4 on one page. Motion budget: **one signature pattern + micro-interactions**. The rest is typography.
